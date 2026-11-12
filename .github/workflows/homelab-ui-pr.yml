@@ -1,6 +1,8 @@
 name: Homelab owned UI checks
 on:
   pull_request:
+  push:
+    branches: [master]
   workflow_dispatch:
 permissions:
   contents: read
@@ -47,3 +49,18 @@ jobs:
             sources/components/sessions/actions/SessionHeaderActionMenu.sessionHandoff.test.tsx \
             sources/components/sessions/shell/SessionView.infoNavigation.test.tsx \
             sources/components/sessions/shell/SessionItem.contextMenu.suppressPress.test.tsx --maxWorkers=2
+      # Same runner, same job: the owned X64 runner does the checks and, only
+      # for a trusted master push or manual run, sends the release dispatch.
+      - name: Dispatch the private homelab release
+        if: github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        env:
+          HOMELAB_DISPATCH_TOKEN: ${{ secrets.HOMELAB_DISPATCH_TOKEN }}
+        run: |
+          test -n "$HOMELAB_DISPATCH_TOKEN"
+          version=$(node -p "require('./apps/ui/package.json').version")
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $HOMELAB_DISPATCH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/benbernard/homelab-config/dispatches \
+            -d "{\"event_type\":\"happier-release\",\"client_payload\":{\"sha\":\"$GITHUB_SHA\",\"version\":\"$version\"}}"
