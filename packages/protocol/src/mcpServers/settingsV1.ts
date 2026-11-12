@@ -39,6 +39,7 @@ export const McpServerCatalogEntryV1Schema = z
     remote: z
       .object({
         url: z.string().min(1),
+        oauth: z.object({ clientId: z.string().min(1).optional(), scope: z.string().optional() }).optional(),
         headers: z.record(McpHeaderKeyV1Schema, McpValueRefV1Schema),
       })
       .optional(),

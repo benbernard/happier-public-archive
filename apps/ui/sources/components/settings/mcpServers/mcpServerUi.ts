@@ -61,6 +61,7 @@ export function resolveBindingBadgeLabels(bindings: ReadonlyArray<McpServerBindi
 
 export function resolveAuthBadgeLabel(authMode: McpPreviewAuthModeV1 | ReturnType<typeof inferMcpServerAuthModeV1>): string {
     switch (authMode) {
+        case 'oauth': return 'OAuth';
         case 'savedSecret':
             return t('settings.mcpServersAuthSavedSecret');
         case 'machineEnv':

@@ -9,7 +9,7 @@ import type {
 import { McpServerCatalogEntryTransportV1Schema } from './settingsV1.js';
 import { SessionMcpSelectionV1Schema } from './sessionSelectionV1.js';
 
-export const McpPreviewAuthModeV1Schema = z.enum(['none', 'savedSecret', 'machineEnv', 'plainText', 'unknown']);
+export const McpPreviewAuthModeV1Schema = z.enum(['oauth', 'none', 'savedSecret', 'machineEnv', 'plainText', 'unknown']);
 export type McpPreviewAuthModeV1 = z.infer<typeof McpPreviewAuthModeV1Schema>;
 
 export const McpPreviewSourceKindV1Schema = z.enum(['builtIn', 'managed', 'detected']);

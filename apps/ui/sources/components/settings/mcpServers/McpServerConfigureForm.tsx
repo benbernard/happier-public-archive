@@ -1,3 +1,4 @@
+import { Switch } from '@/components/ui/forms/Switch';
 import * as React from 'react';
 import { View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
@@ -201,6 +202,21 @@ export const McpServerConfigureForm = React.memo(function McpServerConfigureForm
                         </>
                     ) : (
                         <>
+                            <Item testID="mcp.server.oauth.enabled" title="OAuth" showChevron={false}
+                                rightElement={<Switch value={Boolean(props.draftServer.remote?.oauth)}
+                                    onValueChange={(enabled) => props.onChangeServer((current) => ({ ...current,
+                                        remote: { url: current.remote?.url ?? '', headers: current.remote?.headers ?? {},
+                                            ...(enabled ? { oauth: current.remote?.oauth ?? {} } : {}),
+                                        }, updatedAt: Date.now(),
+                                    }))} />} />
+                            {props.draftServer.remote?.oauth ? <>
+                                <Text style={styles.fieldLabel}>{t('settings.mcpOAuthClientId')}</Text>
+                                <TextInput testID="mcp.server.oauth.clientId" style={styles.textInput}
+                                    value={props.draftServer.remote.oauth.clientId ?? ''} autoCapitalize="none" autoCorrect={false}
+                                    onChangeText={(text) => props.onChangeServer((current) => ({ ...current,
+                                        remote: { ...current.remote!, oauth: { ...current.remote?.oauth, clientId: text.trim() || undefined } },
+                                    }))} />
+                            </> : null}
                             <Text style={styles.fieldLabel}>{t('settings.mcpServersFieldUrl')}</Text>
                             <TextInput
                                 style={styles.textInput}
@@ -210,7 +226,7 @@ export const McpServerConfigureForm = React.memo(function McpServerConfigureForm
                                 onChangeText={(text) =>
                                     props.onChangeServer((current) => ({
                                         ...current,
-                                        remote: { url: text, headers: current.remote?.headers ?? {} },
+                                        remote: { ...current.remote, url: text, headers: current.remote?.headers ?? {} },
                                         updatedAt: Date.now(),
                                     }))}
                                 placeholder="https://example.com/mcp"
@@ -247,7 +263,7 @@ export const McpServerConfigureForm = React.memo(function McpServerConfigureForm
                     onChangeEntries={(next) =>
                         props.onChangeServer((current) => ({
                             ...current,
-                            remote: { url: current.remote?.url ?? '', headers: next },
+                            remote: { ...current.remote, url: current.remote?.url ?? '', headers: next },
                             updatedAt: Date.now(),
                         }))}
                     addRowTitle={t('settings.mcpServersHeadersAdd')}

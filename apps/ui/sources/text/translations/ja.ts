@@ -8,6 +8,12 @@
 import type { TranslationStructure } from "../_types";
 
 const mcpServersUxTranslationExtension = {
+  mcpOAuthClientId: "クライアントID（任意）",
+  mcpOAuthSignIn: "ブラウザーでサインイン",
+  mcpOAuthWaiting: "サインインを完了してHappierに戻ってください",
+  mcpOAuthConnected: "このコンピューターで接続済み",
+  mcpOAuthDisconnect: "OAuth接続を解除",
+
   mcpServersConfiguredEmptySubtitle: 'サーバーを作成し、ホスト JSON をインポートするか、推奨プリセットをインストールしてください。',
   mcpServersHeroSubtitle: ({ configuredCount }: { configuredCount: number }) => `Happier で ${configuredCount} 件が設定済み`,
   mcpServersHeroSubtitleEmpty: 'サーバーは一度作成すれば、適用先をプレビューでき、他のツールで既に使っているものも取り込めます。',

@@ -3692,3 +3692,6 @@ export {
 } from './machines/machineContentKeyTransitionV1.js';
 
 export { assertAccountKeyProvisioningAllowed, AccountKeyProvisioningUnavailableError, verifyAccountContentPublicKeyBinding, createAccountContentPublicKeyBindingMessage } from './auth/accountKeyProvisioning.js';
+
+export { DaemonMcpOAuthRequestSchema, DaemonMcpOAuthResponseSchema,
+  type DaemonMcpOAuthRequest, type DaemonMcpOAuthResponse } from './mcpServers/daemonRpcV1.js';

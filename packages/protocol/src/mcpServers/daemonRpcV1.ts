@@ -128,3 +128,18 @@ export const DaemonMcpServersTestResponseSchema = z.union([
   }).passthrough(),
 ]);
 export type DaemonMcpServersTestResponse = z.infer<typeof DaemonMcpServersTestResponseSchema>;
+
+export const DaemonMcpOAuthRequestSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('start'), server: McpServerCatalogEntryV1Schema }),
+  z.object({ action: z.literal('status'), flowId: z.string().regex(/^[a-f0-9]{64}$/) }),
+  z.object({ action: z.literal('disconnect'), server: McpServerCatalogEntryV1Schema }),
+]);
+export type DaemonMcpOAuthRequest = z.infer<typeof DaemonMcpOAuthRequestSchema>;
+export const DaemonMcpOAuthResponseSchema = z.discriminatedUnion('status', [
+  z.object({ status: z.literal('authorize'), flowId: z.string(), authorizationUrl: z.string().url() }),
+  z.object({ status: z.literal('pending') }),
+  z.object({ status: z.literal('connected') }),
+  z.object({ status: z.literal('disconnected') }),
+  z.object({ status: z.literal('error'), error: z.string() }),
+]);
+export type DaemonMcpOAuthResponse = z.infer<typeof DaemonMcpOAuthResponseSchema>;

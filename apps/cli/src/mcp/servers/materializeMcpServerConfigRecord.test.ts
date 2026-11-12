@@ -184,7 +184,7 @@ describe('materializeMcpServerConfigRecord', () => {
     ).rejects.toThrow(/missing/i);
   });
 
-  it('materializes remote servers via a stdio bridge config file (no secrets in argv)', async () => {
+  it.each([undefined, { clientId: 'public-client' }])('materializes remote servers and OAuth through the private bridge config (%j)', async (oauth) => {
     const dir = await mkdtemp(join(tmpdir(), 'happier-mcp-remote-test-'));
     try {
       const masterSecret = new Uint8Array(32).fill(4);
@@ -200,7 +200,7 @@ describe('materializeMcpServerConfigRecord', () => {
             id: 's1',
             name: 'alpha',
             transport: 'http',
-            remote: { url: 'https://mcp.example.com', headers: { Authorization: { t: 'savedSecret', secretId: 'sec1' } } },
+            remote: { url: 'https://mcp.example.com', ...(oauth ? { oauth } : {}), headers: { Authorization: { t: 'savedSecret', secretId: 'sec1' } } },
             env: {},
             createdAt: 0,
             updatedAt: 0,
@@ -235,6 +235,7 @@ describe('materializeMcpServerConfigRecord', () => {
       const raw = await readFile(configPath, 'utf8');
       expect(raw).toContain('mcp.example.com');
       expect(raw).toContain('Bearer SECRET');
+      expect(JSON.parse(raw).oauth).toEqual(oauth);
 
       const st = await stat(configPath);
       expect(st.mode & 0o777).toBe(0o600);

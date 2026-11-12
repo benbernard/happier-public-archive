@@ -1,3 +1,5 @@
+import { configuration } from '@/configuration';
+import { createMcpOAuthProvider } from '@/mcp/oauth/createMcpOAuthProvider';
 /**
  * Remote MCP STDIO Bridge
  *
@@ -30,6 +32,7 @@ const MCP_BRIDGE_CONNECT_TIMEOUT_MS = 60_000;
 const RemoteBridgeConfigSchema = z.object({
   transport: z.enum(['http', 'sse']),
   url: z.string().min(1),
+  oauth: z.object({ clientId: z.string().optional(), scope: z.string().optional() }).optional(),
   headers: z.record(z.string(), z.string()).optional().default({}),
 });
 
@@ -48,11 +51,15 @@ async function connectRemoteClient(config: RemoteBridgeConfig): Promise<Client> 
 
   const url = new URL(config.url);
   const headers = { ...config.headers };
+  const authProvider = config.oauth ? await createMcpOAuthProvider({ serverUrl: url.href, oauth: config.oauth,
+    redirectUrl: `${configuration.publicServerUrl.replace(/\/+$/, '')}/v1/mcp/oauth/callback`,
+  }) : undefined;
 
   const transport =
     config.transport === 'http'
-      ? new StreamableHTTPClientTransport(url, { requestInit: { headers } })
+      ? new StreamableHTTPClientTransport(url, { authProvider, requestInit: { headers } })
       : new SSEClientTransport(url, {
+        authProvider,
         requestInit: { headers },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         eventSourceInit: { headers } as any,
