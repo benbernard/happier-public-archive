@@ -13,10 +13,16 @@ import type {
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 let timestampDisplayMode = 'hover_web_hidden_mobile';
+let platformOS = 'web';
 let copyButtonsVisible = false;
 let sessionWideStorageHookCalls = 0;
 
 installMessageViewCommonModuleMocks({
+    reactNative: async () => {
+        const { createReactNativeWebMock } = await import('@/dev/testkit/mocks/reactNative');
+        return createReactNativeWebMock({ Platform: { get OS() { return platformOS; } } });
+    },
+    text: async () => await vi.importActual('@/text'),
     storage: async (importOriginal) => {
         const { createStorageModuleMock } = await import('@/dev/testkit/mocks/storage');
         return createStorageModuleMock({
@@ -110,6 +116,7 @@ vi.mock('@expo/vector-icons', () => ({
 describe('MessageView timestamps', () => {
     beforeEach(() => {
         timestampDisplayMode = 'hover_web_hidden_mobile';
+        platformOS = 'web';
         copyButtonsVisible = false;
         sessionWideStorageHookCalls = 0;
         vi.spyOn(Date.prototype, 'toLocaleString').mockReturnValue('legacy locale string');
@@ -121,6 +128,24 @@ describe('MessageView timestamps', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         standardCleanup();
+        vi.useRealTimers();
+    });
+
+    it.each(['user-text', 'agent-text'] as const)('shows the Android %s age without exposing actions', async (kind) => {
+        vi.restoreAllMocks();
+        platformOS = 'android';
+        timestampDisplayMode = 'hover_web_always_mobile';
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-11-11T20:05:00Z'));
+        vi.resetModules();
+        const { MessageView } = await import('./MessageView');
+        const screen = await renderScreen(
+            <MessageView sessionId="s1" metadata={null}
+                message={{ kind, id: 'native-message', localId: 'native', createdAt: Date.now() - 3_600_000, text: 'hello' }} />,
+        );
+        expect(screen.findByTestId('transcript-message-timestamp:native-message')?.props.children).toBe('1h ago');
+        expect(screen.findByTestId('transcript-message-timestamp-button:native-message')?.props.accessibilityLabel)
+            .toBe(new Date(Date.now() - 3_600_000).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }));
     });
 
     it('does not render message timestamps by default before web hover actions are visible', async () => {

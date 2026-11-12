@@ -36,12 +36,15 @@ jobs:
         run: |
           unset HAPPIER_PUBLIC_SERVER_URL HAPPIER_LOCAL_SERVER_URL EXPO_PUBLIC_HAPPY_SERVER_URL
           yarn install --frozen-lockfile --non-interactive
-      - name: Typecheck and composer regression tests
+      - name: Typecheck and UI regression tests
         run: |
           unset HAPPIER_PUBLIC_SERVER_URL HAPPIER_LOCAL_SERVER_URL EXPO_PUBLIC_HAPPY_SERVER_URL
           yarn workspace @happier-dev/app typecheck
           yarn workspace @happier-dev/app vitest run \
             sources/components/sessions/agentInput \
+            sources/components/sessions/transcript/MessageView.timestamps.test.tsx \
+            sources/components/sessions/transcript/messageActions/MessageActionRow.test.tsx \
+            sources/sync/domains/settings/settings.spec.ts \
             sources/components/ui/forms/MultiTextInput.test.tsx \
             sources/components/sessions/new/components/NewSessionSimplePanel.keyboardScaffold.test.tsx \
             sources/components/sessions/actions/SessionHeaderActionMenu.sessionHandoff.test.tsx \

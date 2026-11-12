@@ -681,7 +681,7 @@ function UserTextBlock(props: {
     return (
       <View {...hoverProps}>
         <View
-          style={[styles.structuredUserMessageContainer, props.historical ? styles.historicalMessageContainer : null]}
+          style={[styles.structuredUserMessageContainer, timestampText && !isWeb ? styles.nativeTimestampSpace : null, props.historical ? styles.historicalMessageContainer : null]}
         >
           {selectableMessage ? (
             <View style={styles.messageSelectionCheckboxSlot}>
@@ -724,6 +724,7 @@ function UserTextBlock(props: {
           <MessageActionRow
             messageId={props.message.id}
             timestampText={timestampText}
+            timestampCreatedAt={props.message.createdAt}
             showActions={showMessageActions}
             showPinAction={showPinButton}
             pinAction={hasPinButton ? (
@@ -813,7 +814,7 @@ function UserTextBlock(props: {
           </View>
         ) : null}
         <View
-          style={styles.userMessageWrapper}
+          style={[styles.userMessageWrapper, timestampText && !isWeb ? styles.nativeTimestampSpace : null]}
           {...(isWeb ? {} : { pointerEvents: 'box-none' as const })}
         >
           <View style={styles.userMessageBubbleAligner}>
@@ -862,6 +863,7 @@ function UserTextBlock(props: {
           <MessageActionRow
             messageId={props.message.id}
             timestampText={timestampText}
+            timestampCreatedAt={props.message.createdAt}
             showActions={showMessageActions}
             showPinAction={showPinButton}
             pinAction={hasPinButton ? (
@@ -1248,6 +1250,7 @@ function AgentTextBlock(props: {
         }}
         style={[
           styles.agentMessageContainer,
+          timestampText && !isWeb ? styles.nativeTimestampSpace : null,
           props.message.isThinking === true ? styles.agentMessageContainerThinking : null,
           props.historical ? styles.historicalMessageContainer : null,
         ]}
@@ -1375,6 +1378,7 @@ function AgentTextBlock(props: {
         <MessageActionRow
           messageId={props.message.id}
           timestampText={timestampText}
+          timestampCreatedAt={props.message.createdAt}
           showActions={showMessageActions}
           showPinAction={showPinButton}
           pinAction={hasPinButton ? (
@@ -1835,6 +1839,9 @@ const styles = StyleSheet.create((theme) => ({
     alignSelf: 'stretch',
     position: 'relative',
     maxWidth: '100%',
+  },
+  nativeTimestampSpace: {
+    paddingBottom: 48,
   },
   agentMessageContainerThinking: {
     alignSelf: 'stretch',
