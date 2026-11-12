@@ -79,6 +79,7 @@ describe('InboxPopoverButton', () => {
                 buttonSize={32}
                 iconSize={18}
                 testID="test-inbox-trigger"
+                showLabel
             />,
         );
 
@@ -105,7 +106,7 @@ describe('InboxPopoverButton', () => {
         });
         expect(capture.contentProps).toMatchObject({ model, presentation: 'popover' });
         expect(capture.contentProps?.onBeforeNavigate).toEqual(expect.any(Function));
-        expect(screen.getTextContent()).not.toContain('tabs.inbox');
+        expect(screen.getTextContent()).toContain('tabs.inbox');
 
         await screen.pressByTestIdAsync('inbox.open_full');
 

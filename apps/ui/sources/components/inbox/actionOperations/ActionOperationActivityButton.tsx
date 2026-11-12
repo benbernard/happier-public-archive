@@ -4,6 +4,8 @@ import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import type { ActionOperationSnapshotV1 } from '@happier-dev/protocol';
 
 import { Icon, ICON_SIZE } from '@/components/ui/icons/Icon';
+import { Text } from '@/components/ui/text/Text';
+import { Typography } from '@/constants/Typography';
 import { TabBadge } from '@/components/ui/navigation/tabBadge/TabBadge';
 import { FloatingOverlay } from '@/components/ui/overlays/FloatingOverlay';
 import { Popover } from '@/components/ui/popover';
@@ -33,6 +35,7 @@ export type ActionOperationActivityButtonViewProps = Readonly<{
     buttonSize?: number;
     iconSize?: number;
     testID?: string;
+    showLabel?: boolean;
 }>;
 
 type ActionOperationActivityPopoverPlacement = Readonly<{
@@ -53,6 +56,7 @@ type ActionOperationActivityButtonChromeProps = Readonly<{
     buttonSize?: number;
     iconSize?: number;
     testID?: string;
+    showLabel?: boolean;
 }>;
 
 const ActionOperationActivityButtonChrome = React.memo(function ActionOperationActivityButtonChrome(
@@ -104,7 +108,7 @@ const ActionOperationActivityButtonChrome = React.memo(function ActionOperationA
                 }}
                 style={({ pressed }) => [
                     styles.button,
-                    props.buttonSize != null ? {
+                    props.showLabel ? styles.labelledButton : props.buttonSize != null ? {
                         width: props.buttonSize,
                         height: props.buttonSize,
                         borderRadius: props.buttonSize / 2,
@@ -120,6 +124,7 @@ const ActionOperationActivityButtonChrome = React.memo(function ActionOperationA
                         <TabBadge testID="action-operation-activity-attention-dot" variant="dot" />
                     )}
                 </View>
+                {props.showLabel ? <Text style={[styles.buttonLabel, { color: tintColor }]}>{t('inbox.updates')}</Text> : null}
             </Pressable>
             {open ? props.renderDetails({
                 anchorRef,
@@ -253,6 +258,7 @@ export const ActionOperationActivityButtonView = React.memo(function ActionOpera
             buttonSize={props.buttonSize}
             iconSize={props.iconSize}
             testID={props.testID}
+            showLabel={props.showLabel}
         />
     );
 });
@@ -283,6 +289,7 @@ export const ActionOperationActivityButton = React.memo(function ActionOperation
     buttonSize?: number;
     iconSize?: number;
     testID?: string;
+    showLabel?: boolean;
 }>) {
     const accountId = useActiveServerAccountScope()?.accountId ?? '';
     const summary = useActionOperationActivitySummary(accountId);
@@ -297,6 +304,7 @@ export const ActionOperationActivityButton = React.memo(function ActionOperation
             buttonSize={props.buttonSize}
             iconSize={props.iconSize}
             testID={props.testID}
+            showLabel={props.showLabel}
         />
     );
 });
@@ -316,6 +324,19 @@ const styles = StyleSheet.create((theme) => ({
     buttonPressed: {
         opacity: 0.68,
         transform: [{ scale: 0.96 }],
+    },
+    labelledButton: {
+        width: 'auto',
+        height: 'auto',
+        minHeight: 48,
+        minWidth: 48,
+        paddingHorizontal: 8,
+        flexDirection: 'row',
+        gap: 8,
+    },
+    buttonLabel: {
+        fontSize: 14,
+        ...Typography.default(),
     },
     glyph: {
         position: 'relative',

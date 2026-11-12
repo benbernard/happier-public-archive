@@ -13,6 +13,9 @@ const desktopWindowBridgeState = vi.hoisted(() => ({
 
 const itemRowActionsState = vi.hoisted(() => ({
     lastActionIds: [] as string[],
+    platform: 'web',
+    forceCompact: false,
+    compactActionIds: [] as string[],
 }));
 
 installNavigationShellCommonModuleMocks({
@@ -20,7 +23,7 @@ installNavigationShellCommonModuleMocks({
         const { createReactNativeWebMock } = await import('@/dev/testkit/mocks/reactNative');
         return createReactNativeWebMock({
             Platform: {
-                OS: 'web',
+                get OS() { return itemRowActionsState.platform; },
             },
             Pressable: ({ children, ...props }: any) => React.createElement('Pressable', props, children),
             View: 'View',
@@ -44,6 +47,8 @@ vi.mock('@/components/navigation/ConnectionStatusControl', () => ({
 vi.mock('@/components/ui/lists/ItemRowActions', () => ({
     ItemRowActions: (props: {
         actions: Array<{ id: string }>;
+        forceCompact?: boolean;
+        compactActionIds?: string[];
         leadingPinnedContent?: React.ReactNode;
         renderOverflowTrigger?: (params: {
             open: boolean;
@@ -54,6 +59,8 @@ vi.mock('@/components/ui/lists/ItemRowActions', () => ({
         }) => React.ReactNode;
     }) => {
         itemRowActionsState.lastActionIds = props.actions.map((action) => action.id);
+        itemRowActionsState.forceCompact = props.forceCompact === true;
+        itemRowActionsState.compactActionIds = props.compactActionIds ?? [];
         return React.createElement(
             View,
             { testID: 'desktop-sidebar-item-actions' },
@@ -89,6 +96,33 @@ describe('DesktopSidebarChrome', () => {
     beforeEach(() => {
         desktopWindowBridgeState.startDesktopWindowDragging.mockReset();
         itemRowActionsState.lastActionIds = [];
+        itemRowActionsState.platform = 'web';
+    });
+
+    it('keeps native utilities out of the title row and labels them below it', async () => {
+        itemRowActionsState.platform = 'android';
+        const { DesktopSidebarChrome } = await import('./DesktopSidebarChrome');
+        const screen = await renderScreen(
+            <DesktopSidebarChrome
+                sidebarWidthPx={600}
+                headerHeightPx={56}
+                onPressHome={vi.fn()}
+                environmentBadge={null}
+                headerActions={[]}
+                inboxEnabled
+                inboxSummary={{ hasContent: true }}
+                renderHeaderOverflowVisual={() => <View />}
+                popoverBoundaryRef={{ current: null }}
+            />,
+        );
+        const actions = requireTestInstance(screen.findByTestId('desktop-sidebar-chrome-actions-row'), 'actions');
+        expect(actions.findAll((node) => node.props.testID === 'sidebar-inbox-button')).toHaveLength(0);
+        expect(actions.findAll((node) => node.props.testID === 'desktop-sidebar-action-operations')).toHaveLength(0);
+        expect(itemRowActionsState.forceCompact).toBe(true);
+        expect(itemRowActionsState.compactActionIds).toEqual(['newSession']);
+        const utilities = requireTestInstance(screen.findByTestId('sidebar-native-utilities'), 'labelled utilities');
+        expect(utilities.findAll((node) => node.props.testID === 'sidebar-inbox-button' && node.props.showLabel)).toHaveLength(1);
+        expect(utilities.findAll((node) => node.props.testID === 'desktop-sidebar-action-operations' && node.props.showLabel).length).toBeGreaterThan(0);
     });
 
     it('places utility controls above the branded sidebar row', async () => {
