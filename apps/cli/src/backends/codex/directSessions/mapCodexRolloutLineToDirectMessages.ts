@@ -45,17 +45,25 @@ export function mapCodexRolloutLineToDirectMessages(params: Readonly<{
     params.actions,
     { sidechainId: params.sidechainId ?? null },
   );
-  return mapCodexProjectedEventsToDirectMessages({
+  const messages = mapCodexProjectedEventsToDirectMessages({
     projected,
     createdAtMs: extractEnvelopeTimestampMs(params.lineValue),
     idForIndex: index => stableOffsetId(`codex:${params.fileRelPath}`, params.lineStartOffsetBytes, index),
   });
+  if (!params.sidechainId && params.actions.some(action => action.type === 'turn-lifecycle'
+    && action.event.type === 'turn_terminal' && action.event.reason === 'completed')) {
+    const id = `${stableOffsetId(`codex:${params.fileRelPath}`, params.lineStartOffsetBytes, 0)}:ready`;
+    messages.push({ id, localId: id, createdAtMs: extractEnvelopeTimestampMs(params.lineValue),
+      raw: { role: 'agent', content: { type: 'event', id, data: { type: 'ready' } } } });
+  }
+  return messages;
 }
 
 export function mapCodexProjectedEventsToDirectMessages(params: Readonly<{
   projected: readonly CodexProjectedRolloutEvent[];
   createdAtMs: number;
   idForIndex: (index: number) => string;
+  turnCompleted?: boolean;
 }>): DirectTranscriptRawMessageV1[] {
   const { projected, createdAtMs } = params;
   const out: DirectTranscriptRawMessageV1[] = [];
@@ -89,6 +97,7 @@ export function mapCodexProjectedEventsToDirectMessages(params: Readonly<{
             data: {
               type: 'message',
               message: action.text,
+              ...(params.turnCompleted ? { turnCompleted: true } : {}),
               ...(action.sidechainId ? { sidechainId: action.sidechainId } : {}),
             },
           },

@@ -1,6 +1,6 @@
 import type { DirectTranscriptRawMessageV1 } from '@happier-dev/protocol';
 
-import { classifyOpenCodeMessageForProjection, extractOpenCodeProjectedText } from '../transcriptProjection';
+import { classifyOpenCodeAssistantCompletion, classifyOpenCodeMessageForProjection, extractOpenCodeProjectedText } from '../transcriptProjection';
 
 export function mapOpenCodeMessageToDirectItem(message: unknown, index: number): DirectTranscriptRawMessageV1 | null {
   const fallbackId = `opencode:${Math.max(0, Math.trunc(index))}`;
@@ -50,7 +50,9 @@ export function mapOpenCodeMessageToDirectItem(message: unknown, index: number):
     createdAtMs: projection.createdAtMs,
     raw: {
       role: 'agent',
-      content: { type: 'acp', provider: 'opencode', data: { type: 'message', message: text } },
+      content: { type: 'acp', provider: 'opencode', data: { type: 'message', message: text,
+        ...(classifyOpenCodeAssistantCompletion(rec).kind === 'terminal_success' ? { turnCompleted: true } : {}),
+      } },
     },
   };
 }

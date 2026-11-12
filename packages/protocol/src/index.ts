@@ -3692,3 +3692,6 @@ export {
 } from './machines/machineContentKeyTransitionV1.js';
 
 export { assertAccountKeyProvisioningAllowed, AccountKeyProvisioningUnavailableError, verifyAccountContentPublicKeyBinding, createAccountContentPublicKeyBindingMessage } from './auth/accountKeyProvisioning.js';
+
+export { resolveSessionNotificationIdentifier } from './push/sessionNotificationIdentifier.js';
+export { isDirectSessionTurnCompletion } from './directSessions/directSessionTurnCompletion.js';

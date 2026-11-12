@@ -274,7 +274,7 @@ describe('createManagedDirectSessionFollowLease', () => {
     });
   });
 
-  it('dispatches ready notifications for detached background-follow assistant previews', async () => {
+  it('waits for turn completion before notifying a detached background follow', async () => {
     const listeners: TranscriptUpdateListener[] = [];
 
     await createManagedDirectSessionFollowLease({
@@ -303,6 +303,14 @@ describe('createManagedDirectSessionFollowLease', () => {
       truncated: false,
     });
 
+    expect(dispatchActivityNotificationAsyncMock).not.toHaveBeenCalled();
+    await currentListener({
+      items: [{ id: 'ready-1', createdAtMs: 1_100, raw: {
+        role: 'agent', content: { type: 'event', data: { type: 'ready' } },
+      } }],
+      fromCursor: 'cursor-notification', nextCursor: 'cursor-ready', truncated: false,
+    });
+
     expect(dispatchActivityNotificationAsyncMock).toHaveBeenCalledWith(expect.objectContaining({
       event: expect.objectContaining({
         topic: 'ready',
@@ -311,6 +319,13 @@ describe('createManagedDirectSessionFollowLease', () => {
         assistantPreviewText: 'hello from push',
       }),
     }));
+    await currentListener({
+      items: [{ id: 'ready-1', createdAtMs: 1_100, raw: {
+        role: 'agent', content: { type: 'event', data: { type: 'ready' } },
+      } }],
+      fromCursor: 'cursor-ready', nextCursor: 'cursor-ready', truncated: false,
+    });
+    expect(dispatchActivityNotificationAsyncMock).toHaveBeenCalledTimes(1);
   });
 
   it('suppresses detached metadata and ready notifications while background-follow effects are disabled', async () => {

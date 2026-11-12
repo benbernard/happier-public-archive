@@ -1,3 +1,4 @@
+import { isDirectSessionTurnCompletion } from '@happier-dev/protocol';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -60,6 +61,14 @@ describe('Codex native paginated direct history (0.162.1 contract)', () => {
     const methods = (await readFile(f.requestsPath, 'utf8')).trim().split('\n').map(line => JSON.parse(line).method);
     expect(methods).toContain('thread/items/list');
     expect(methods.filter(method => !['initialize', 'initialized', 'thread/items/list'].includes(method))).toEqual([]);
+  });
+
+  it('notifies only for completed final answers in native history', async () => {
+    const partial = { ...message('a1', 'working', 'agent'), item: { id: 'a1', type: 'agentMessage', text: 'working', phase: 'commentary' } };
+    const final = { ...message('a2', 'done', 'agent'), item: { id: 'a2', type: 'agentMessage', text: 'done', phase: 'final_answer' } };
+    const f = await fixture([partial, final]);
+    const page = await pageCodexTranscript({ ...f.params, direction: 'older' });
+    expect(page.items.map(isDirectSessionTurnCompletion)).toEqual([false, true]);
   });
 
   it('fails explicitly when neither rollout history nor a readable native history API is available', async () => {

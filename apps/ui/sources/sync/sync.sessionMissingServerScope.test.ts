@@ -2406,7 +2406,7 @@ describe('sync.fetchMessages server-scoped known-session checks', () => {
         expect(notifyActivityReadyMock).toHaveBeenCalledWith(sessionId, expect.any(Array));
     });
 
-    it('emits activity notifications for pushed direct-session agent replies without requiring a ready event', async () => {
+    it('does not notify for intermediate direct-session agent replies', async () => {
         const sessionId = 'direct_session_push_agent_reply_notification';
         storage.getState().applySessions([createDirectSession(sessionId)]);
 
@@ -2440,12 +2440,40 @@ describe('sync.fetchMessages server-scoped known-session checks', () => {
         });
         await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(notifyActivityReadyMock).toHaveBeenCalledWith(sessionId, [
-            expect.objectContaining({
-                kind: 'agent-text',
-                text: 'followed direct reply',
-            }),
-        ]);
+        expect(notifyActivityReadyMock).not.toHaveBeenCalled();
+    });
+
+    it.each(['ready-event', 'settled-message'])('notifies once with the latest text when completion arrives separately (%s)', async (completion) => {
+        const sessionId = `direct_completion_${completion}`;
+        storage.getState().applySessions([createDirectSession(sessionId)]);
+        const { sync } = await import('./sync');
+        (sync as any).encryption = { getSessionEncryption: () => null };
+        const reply = { id: 'final-text', createdAtMs: 2, raw: { role: 'agent', content: {
+            type: 'codex', data: { type: 'message', message: 'The latest answer' },
+        } } };
+        let cursor = 'tail';
+        const push = async (items: unknown[]) => {
+            const nextCursor = `${cursor}-next`;
+            (sync as any).handleEphemeralUpdate({ type: 'direct-session-transcript-delta', sessionId,
+                items, fromCursor: cursor, nextCursor, truncated: false });
+            cursor = nextCursor;
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        };
+        await push([reply]);
+        expect(notifyActivityReadyMock).not.toHaveBeenCalled();
+        const completed = completion === 'ready-event'
+            ? { id: 'ready-event', createdAtMs: 3, raw: { role: 'agent', content: {
+                type: 'event', id: 'ready-event', data: { type: 'ready' },
+            } } }
+            : { ...reply, raw: { ...reply.raw, content: { ...reply.raw.content,
+                data: { ...reply.raw.content.data, turnCompleted: true },
+            } } };
+        await push([completed]);
+        expect(notifyActivityReadyMock).toHaveBeenCalledWith(sessionId, [expect.objectContaining({
+            kind: 'agent-text', text: 'The latest answer',
+        })]);
+        await push([completed]);
+        expect(notifyActivityReadyMock).toHaveBeenCalledTimes(1);
     });
 
     it.each([

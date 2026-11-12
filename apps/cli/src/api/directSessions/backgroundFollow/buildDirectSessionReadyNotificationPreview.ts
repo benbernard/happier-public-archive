@@ -71,7 +71,7 @@ function readDirectTranscriptItemPreview(item: DirectTranscriptRawMessageV1): st
   if (typedContent.type === 'text') {
     return normalizePreviewText(typedContent.text);
   }
-  if (typedContent.type === 'codex') {
+  if (typedContent.type === 'codex' || typedContent.type === 'acp') {
     return readCodexOutputPreview(typedContent.data);
   }
   if (typedContent.type === 'output') {

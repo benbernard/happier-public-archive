@@ -63,6 +63,19 @@ describe('PushNotificationClient.sendToAllDevicesAsync', () => {
     (axios as any).delete.mockReset();
   });
 
+  it('replaces session alerts while keeping different sessions separate', async () => {
+    vi.mocked(axios.get).mockResolvedValue({ data: { tokens: [{ id: '1', token: 'ExponentPushToken[a]' }] } });
+    const client = new PushNotificationClient('t', 'https://api.example.test');
+    await client.sendToAllDevicesAsync('Ready', 'First', { sessionId: 'one' });
+    await client.sendToAllDevicesAsync('Ready', 'Latest', { sessionId: 'one' });
+    await client.sendToAllDevicesAsync('Ready', 'Other', { sessionId: 'two' });
+    const messages = sendPushNotificationsAsyncSpy.mock.calls.map(([chunk]) => chunk[0]);
+    expect(messages[0].tag).toEqual(expect.any(String));
+    expect(messages[1].tag).toBe(messages[0].tag);
+    expect(messages[2].tag).not.toBe(messages[0].tag);
+    expect(messages[1].collapseId).toBe(messages[1].tag);
+  });
+
   it('bounds the serialized outbound message while preserving Unicode and routing data', async () => {
     vi.mocked(axios.get).mockResolvedValue({ data: { tokens: [{ id: '1', token: 'ExponentPushToken[a]' }] } });
     const data = { sessionId: 's_1', requestId: 'p_1', kind: 'permission', tool: 'Bash' };

@@ -100,6 +100,7 @@ export async function pageCodexNativeTranscript(params: Readonly<{
       const key = identity(entry);
       const projected = projectCodexRolloutActions(projectCodexNativeHistoryItem(entry.item), { sidechainId: null });
       const messages = mapCodexProjectedEventsToDirectMessages({ projected,
+        turnCompleted: entry.completedAtMs !== null && entry.item.type === 'agentMessage' && entry.item.phase === 'final_answer',
         createdAtMs: entry.startedAtMs ?? entry.completedAtMs ?? 0,
         idForIndex: action => `codex:native:${params.remoteSessionId}:${key}:${action}` });
       if (params.direction === 'older') messages.reverse();
