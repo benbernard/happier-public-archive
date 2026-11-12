@@ -77,6 +77,12 @@ const ActionOperationActivityButtonChrome = React.memo(function ActionOperationA
     if (!visible) return null;
 
     const tintColor = props.tintColor ?? theme.colors.chrome.header.foreground;
+    const badgeStyle = props.showLabel ? styles.inlineBadge : undefined;
+    const badge = props.activeCount > 0 ? (
+        <TabBadge testID="action-operation-activity-count" variant="count" value={props.activeCount} tone="neutral" style={badgeStyle} />
+    ) : (
+        <TabBadge testID="action-operation-activity-attention-dot" variant="dot" style={badgeStyle} />
+    );
     return (
         <View ref={anchorRef} collapsable={false} style={styles.anchor}>
             <Pressable
@@ -118,13 +124,10 @@ const ActionOperationActivityButtonChrome = React.memo(function ActionOperationA
             >
                 <View style={styles.glyph}>
                     <Icon name="pulse" size={props.iconSize ?? ICON_SIZE.md} color={tintColor} />
-                    {props.activeCount > 0 ? (
-                        <TabBadge testID="action-operation-activity-count" variant="count" value={props.activeCount} tone="neutral" />
-                    ) : (
-                        <TabBadge testID="action-operation-activity-attention-dot" variant="dot" />
-                    )}
+                    {props.showLabel ? null : badge}
                 </View>
                 {props.showLabel ? <Text style={[styles.buttonLabel, { color: tintColor }]}>{t('inbox.updates')}</Text> : null}
+                {props.showLabel ? badge : null}
             </Pressable>
             {open ? props.renderDetails({
                 anchorRef,
@@ -337,6 +340,11 @@ const styles = StyleSheet.create((theme) => ({
     buttonLabel: {
         fontSize: 14,
         ...Typography.default(),
+    },
+    inlineBadge: {
+        position: 'relative',
+        top: 0,
+        right: 0,
     },
     glyph: {
         position: 'relative',
