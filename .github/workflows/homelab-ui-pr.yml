@@ -7,7 +7,7 @@ permissions:
 jobs:
   owned-ui:
     if: github.repository == 'benbernard/happier' && github.actor == 'benbernard' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: [self-hosted, Linux, ARM64, happier-ui, owned-mac]
+    runs-on: [self-hosted, Linux, X64, happier-ui]
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -19,6 +19,15 @@ jobs:
         env:
           EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.14.0'
+      - name: Activate Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          yarn --version
       - name: Install frozen UI dependencies
         env:
           HAPPIER_INSTALL_SCOPE: ui,protocol,agents,cli-common,release-runtime,transfers,connection-supervisor,audio-stream-native,sherpa-native
