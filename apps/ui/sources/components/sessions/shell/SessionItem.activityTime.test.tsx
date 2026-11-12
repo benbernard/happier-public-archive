@@ -265,6 +265,7 @@ function createSessionRowModel(overrides: Partial<SessionListRowModel> = {}): Se
         title: 'Model Session',
         subtitle: 'Model Subtitle',
         subtitleEllipsizeMode: 'head',
+        machineLabel: null,
         groupKey: 'recent',
         groupKind: null,
         section: 'recent',

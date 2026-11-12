@@ -361,6 +361,16 @@ export function buildSessionListRowModel(input: BuildSessionListRowModelInput): 
         settings,
         session: resolvedSession,
     });
+    const reachableDisplay = settings.reachableSessionDisplayByKey[rowKey];
+    const reachableMachineLabelRaw = normalizeNonEmptyString(reachableDisplay?.machineLabel);
+    const reachableMachineId = normalizeNonEmptyString(reachableDisplay?.machineId);
+    const machineLabelFromReachableDisplay = reachableMachineLabelRaw
+        && reachableMachineLabelRaw !== 'unknown'
+        && reachableMachineLabelRaw !== reachableMachineId
+        ? reachableMachineLabelRaw
+        : null;
+    const machineLabel = machineLabelFromReachableDisplay
+        ?? normalizeNonEmptyString((resolvedSession.metadata as { host?: unknown } | null | undefined)?.host);
     const presentation = resolveSessionRowPresentation({
         attentionState: rowAttentionState,
         density: settings.density,
@@ -428,6 +438,7 @@ export function buildSessionListRowModel(input: BuildSessionListRowModelInput): 
         title,
         subtitle,
         subtitleEllipsizeMode,
+        machineLabel,
         groupKey: String(item.groupKey ?? '').trim(),
         groupKind: item.groupKind ?? null,
         section: item.section ?? null,

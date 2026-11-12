@@ -131,6 +131,8 @@ type SessionItemBaseProps = Readonly<{
     subtitleEllipsizeMode?: 'head' | 'tail';
     serverId?: string;
     serverName?: string;
+    /** Resolved machine name drawn as a persistent chip on the row. */
+    machineLabel?: string | null;
     currentUserId?: string | null;
     showServerBadge?: boolean;
     pinned?: boolean;
@@ -177,6 +179,7 @@ type SessionItemRenderProps = Omit<SessionItemBaseProps, 'activityTimeMode' | 's
     sessionStatus: SessionStatus;
     sessionNameResolved: string;
     sessionSubtitle: string;
+    machineLabel: string | null;
     pendingCount: number;
     hasUnreadMessages: boolean;
     draft: SessionListRowModel['draft'];
@@ -491,6 +494,35 @@ const stylesheet = StyleSheet.create((theme) => ({
         color: theme.colors.text.secondary,
         ...Typography.default('semiBold'),
     },
+    machineBadgeContainer: {
+        borderRadius: 999,
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+        backgroundColor: theme.colors.surface.inset,
+        maxWidth: 120,
+        flexShrink: 0,
+    },
+    machineBadgeContainerCompact: {
+        paddingHorizontal: 6,
+        paddingVertical: 1,
+        maxWidth: 100,
+    },
+    machineBadgeContainerMinimal: {
+        paddingHorizontal: 5,
+        paddingVertical: 1,
+        maxWidth: 84,
+    },
+    machineBadgeText: {
+        fontSize: 10,
+        color: theme.colors.text.secondary,
+        ...Typography.default('semiBold'),
+    },
+    machineBadgeTextCompact: {
+        fontSize: 9,
+    },
+    machineBadgeTextMinimal: {
+        fontSize: 9,
+    },
     rightArea: {
         marginLeft: 8,
         flexDirection: 'row',
@@ -709,6 +741,7 @@ const SessionItemContent = React.memo(
         sessionStatus,
         sessionNameResolved,
         sessionSubtitle,
+        machineLabel,
         pendingCount,
         hasUnreadMessages,
         draft,
@@ -1437,6 +1470,30 @@ const SessionItemContent = React.memo(
                                 {sessionNameResolved}
                             </Text>
                         )}
+                        {machineLabel ? (
+                            <View
+                                testID={`session-list-machine-badge-${resolvedSession.id}`}
+                                accessible={true}
+                                accessibilityRole="text"
+                                accessibilityLabel={machineLabel}
+                                style={[
+                                    styles.machineBadgeContainer,
+                                    compact ? styles.machineBadgeContainerCompact : null,
+                                    isMinimal ? styles.machineBadgeContainerMinimal : null,
+                                ]}
+                            >
+                                <Text
+                                    style={[
+                                        styles.machineBadgeText,
+                                        compact ? styles.machineBadgeTextCompact : null,
+                                        isMinimal ? styles.machineBadgeTextMinimal : null,
+                                    ]}
+                                    numberOfLines={1}
+                                >
+                                    {machineLabel}
+                                </Text>
+                            </View>
+                        ) : null}
                         {showServerBadge && serverName ? (
                             <View style={styles.serverBadgeContainer}>
                                 <Text style={styles.serverBadgeText} numberOfLines={1}>
@@ -1886,6 +1943,7 @@ function SessionItemFromRowModel(props: SessionItemProps & { rowModel: SessionLi
             sessionStatus={rowModel.status}
             sessionNameResolved={rowModel.title}
             sessionSubtitle={itemProps.subtitleOverride ?? rowModel.subtitle}
+            machineLabel={itemProps.machineLabel ?? rowModel.machineLabel}
             pendingCount={rowModel.pendingCount}
             hasUnreadMessages={rowModel.hasUnreadMessages}
             draft={rowModel.draft}

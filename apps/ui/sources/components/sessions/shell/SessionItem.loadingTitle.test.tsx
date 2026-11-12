@@ -189,6 +189,7 @@ function createMetadataPendingRowModel(id: string): SessionListRowModel {
         title: 'status.unknown',
         subtitle: '',
         subtitleEllipsizeMode: 'head',
+        machineLabel: null,
         groupKey: 'group-a',
         groupKind: 'project',
         section: 'active',

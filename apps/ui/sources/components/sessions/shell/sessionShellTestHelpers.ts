@@ -35,6 +35,7 @@ export type SessionItemTestRowModelInput = Readonly<{
     secondaryLineMode?: SessionListSecondaryLineMode;
     subtitleOverride?: string | null;
     subtitleEllipsizeMode?: 'head' | 'tail';
+    machineLabel?: string | null;
     compact?: boolean;
     compactMinimal?: boolean;
     folderDepth?: number;
@@ -129,6 +130,7 @@ export function createSessionItemTestRowModel(
         title: session.metadata == null ? 'status.unknown' : 'Session',
         subtitle,
         subtitleEllipsizeMode: input.subtitleEllipsizeMode ?? 'head',
+        machineLabel: input.machineLabel ?? null,
         groupKey: 'group-a',
         groupKind: null,
         section: 'active',

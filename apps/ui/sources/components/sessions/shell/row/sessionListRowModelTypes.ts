@@ -72,6 +72,7 @@ export type SessionListRowPresentationSettings = Readonly<{
     attentionStandingPolicy: SessionAttentionStandingPolicy;
     hasMultipleMachines: boolean;
     reachableSessionDisplayByKey: Readonly<Record<string, {
+        machineId?: string | null;
         workspaceSubtitle?: string;
         machineLabel?: string;
         workspaceSubtitleEllipsizeMode?: 'head' | 'tail';
@@ -108,6 +109,15 @@ export type SessionListRowModel = Readonly<{
     title: string;
     subtitle: string;
     subtitleEllipsizeMode: 'head' | 'tail';
+    /**
+     * Resolved machine name for this row, or `null` when it cannot be named.
+     *
+     * The list row draws it as a small persistent chip so a session's machine stays
+     * visible even when the secondary line is carrying a status instead of the
+     * machine · workspace path. Never the raw machine id: an unnamed machine stays
+     * unnamed rather than showing a UUID.
+     */
+    machineLabel: string | null;
     groupKey: string;
     groupKind: SessionListRowSessionItem['groupKind'] | null;
     section: SessionListRowSessionItem['section'] | 'recent' | 'pinned' | 'archived' | null;

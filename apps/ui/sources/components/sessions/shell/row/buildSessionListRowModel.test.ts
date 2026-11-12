@@ -1015,6 +1015,56 @@ describe('buildSessionListRowModel', () => {
         expect(model.subtitleEllipsizeMode).toBe('tail');
     });
 
+    it('exposes a machine label for the persistent row chip', () => {
+        const session = createRenderable('s1');
+        const settings = createSettings({
+            reachableSessionDisplayByKey: {
+                [sessionTagKey('server-a', 's1')]: {
+                    machineId: 'machine-1',
+                    machineLabel: 'MacBook',
+                    workspaceSubtitle: 'Repo A',
+                    workspaceSubtitleEllipsizeMode: 'head',
+                },
+            },
+        });
+
+        const model = buildSessionListRowModel({
+            item: createSessionItem(session, { serverId: 'server-a' }),
+            state: {},
+            isFirst: true,
+            isLast: true,
+            isSingle: true,
+            settings,
+        });
+
+        expect(model.machineLabel).toBe('MacBook');
+    });
+
+    it('falls back to the session host for the row chip when the reachable label is only a machine id', () => {
+        const session = createRenderable('s1');
+        const settings = createSettings({
+            reachableSessionDisplayByKey: {
+                [sessionTagKey('server-a', 's1')]: {
+                    machineId: 'machine-1',
+                    machineLabel: 'machine-1',
+                    workspaceSubtitle: 'Repo A',
+                    workspaceSubtitleEllipsizeMode: 'head',
+                },
+            },
+        });
+
+        const model = buildSessionListRowModel({
+            item: createSessionItem(session, { serverId: 'server-a' }),
+            state: {},
+            isFirst: true,
+            isLast: true,
+            isSingle: true,
+            settings,
+        });
+
+        expect(model.machineLabel).toBe('workstation.local');
+    });
+
     it('preserves archived, pinned, unread, folder, and tag facts for presentational rows', () => {
         const session = createRenderable('s1', {
             archivedAt: NOW_MS - 1,

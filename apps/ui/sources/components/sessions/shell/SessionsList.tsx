@@ -358,18 +358,21 @@ function buildReachableDisplaySignature(displayByKey: ReadonlyMap<string, Readon
 }
 
 function buildReachableDisplayRecord(displayByKey: ReadonlyMap<string, Readonly<{
+    machineId: string | null;
     machineLabel: string;
     workspaceSubtitle: string;
     workspaceSubtitleEllipsizeMode: 'head' | 'tail';
 }>>): SessionListRowPresentationSettings['reachableSessionDisplayByKey'] {
     if (displayByKey.size === 0) return EMPTY_REACHABLE_SESSION_DISPLAY_BY_KEY;
     const record: Record<string, {
+        machineId: string | null;
         machineLabel: string;
         workspaceSubtitle: string;
         workspaceSubtitleEllipsizeMode: 'head' | 'tail';
     }> = {};
     for (const [rowKey, display] of displayByKey.entries()) {
         record[rowKey] = {
+            machineId: display.machineId,
             machineLabel: display.machineLabel,
             workspaceSubtitle: display.workspaceSubtitle,
             workspaceSubtitleEllipsizeMode: display.workspaceSubtitleEllipsizeMode,
