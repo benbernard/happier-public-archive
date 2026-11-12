@@ -1,10 +1,37 @@
 import * as React from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
 import { Text } from '@/components/ui/text/Text';
+import { Typography } from '@/constants/Typography';
+import { useNowMs } from '@/hooks/time/useNowMs';
+import { formatRelativeTimeShort } from '@/components/ui/selectionList/formatRelativeTimeShort';
+import { Modal } from '@/modal';
+import { t } from '@/text';
 
 import { RowActionRevealSlot } from './RowActionRevealSlot';
+
+function NativeMessageTimestamp(props: Readonly<{
+    messageId: string;
+    createdAt: number;
+    fullTimestamp: string;
+}>): React.ReactElement {
+    const nowMs = useNowMs();
+    return (
+        <Pressable
+            testID={`transcript-message-timestamp-button:${props.messageId}`}
+            accessibilityRole="button"
+            accessibilityLabel={props.fullTimestamp}
+            onPress={() => Modal.alert(t('common.details'), props.fullTimestamp)}
+            style={styles.timestampButton}
+        >
+            <Text testID={`transcript-message-timestamp:${props.messageId}`}
+                style={[styles.timestampText, Typography.tabular()]}>
+                {formatRelativeTimeShort(props.createdAt, nowMs)}
+            </Text>
+        </Pressable>
+    );
+}
 
 /**
  * Timestamp + hover-revealed actions for one transcript message.
@@ -25,6 +52,7 @@ export function MessageActionRow(props: Readonly<{
     onActionsFocus?: () => void;
     onActionsBlur?: () => void;
     timestampText: string | null;
+    timestampCreatedAt: number;
 }>): React.ReactElement {
     const hasTimestamp = typeof props.timestampText === 'string' && props.timestampText.length > 0;
     return (
@@ -37,7 +65,10 @@ export function MessageActionRow(props: Readonly<{
             ]}
             testID={`transcript-message-actions-row:${props.messageId}`}
         >
-            {hasTimestamp ? (
+            {hasTimestamp && !props.isWeb ? (
+                <NativeMessageTimestamp messageId={props.messageId}
+                    createdAt={props.timestampCreatedAt} fullTimestamp={props.timestampText!} />
+            ) : hasTimestamp ? (
                 <Text
                     testID={`transcript-message-timestamp:${props.messageId}`}
                     style={[
@@ -84,6 +115,12 @@ const styles = StyleSheet.create((theme) => ({
     },
     containerWebPointerEvents: {
         pointerEvents: 'box-none',
+    },
+    timestampButton: {
+        minWidth: 48,
+        minHeight: 48,
+        justifyContent: 'center',
+        alignItems: 'flex-end',
     },
     timestampText: {
         color: theme.colors.text.tertiary,
