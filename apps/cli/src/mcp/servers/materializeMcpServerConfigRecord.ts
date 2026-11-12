@@ -164,6 +164,7 @@ async function materializeRemoteServer(params: Readonly<{
       transport: params.server.transport,
       url: params.server.remote.url,
       headers: params.resolvedHeaders,
+      ...(params.server.remote.oauth ? { oauth: params.server.remote.oauth } : {}),
     },
   });
   params.writtenPaths.push(configPath);

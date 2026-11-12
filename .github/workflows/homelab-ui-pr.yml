@@ -30,7 +30,7 @@ jobs:
           yarn --version
       - name: Install frozen UI dependencies
         env:
-          HAPPIER_INSTALL_SCOPE: ui,cli,protocol,agents,cli-common,release-runtime,transfers,connection-supervisor,audio-stream-native,sherpa-native
+          HAPPIER_INSTALL_SCOPE: ui,cli,server,protocol,agents,cli-common,release-runtime,transfers,connection-supervisor,audio-stream-native,sherpa-native
           HAPPIER_UI_VENDOR_WEB_ASSETS: '0'
           HAPPIER_EAS_ENSURE_UI_WORKSPACES_BUILT: '1'
         run: |
@@ -49,6 +49,9 @@ jobs:
             sources/components/sessions/transcript/MessageView.timestamps.test.tsx \
             sources/components/sessions/transcript/messageActions/MessageActionRow.test.tsx \
             sources/sync/domains/settings/settings.spec.ts \
+            sources/components/settings/mcpServers/McpServerOAuthActions.test.tsx \
+            sources/components/settings/mcpServers/McpServerEditorScreen.test.tsx \
+            sources/components/settings/mcpServers/McpServerTestPanel.test.tsx \
             sources/activity/notifications/channels/sendExpoLocalNotification.test.ts \
             sources/sync/sync.sessionMissingServerScope.test.ts \
             sources/sync/sync.readyNotificationDedupe.test.ts \
@@ -58,6 +61,17 @@ jobs:
             sources/components/sessions/actions/SessionHeaderActionMenu.sessionHandoff.test.tsx \
             sources/components/sessions/shell/SessionView.infoNavigation.test.tsx \
             sources/components/sessions/shell/SessionItem.contextMenu.suppressPress.test.tsx --maxWorkers=2
+      - name: Check MCP OAuth contracts and runtime
+        run: |
+          node --test scripts/android_only_build_guards.test.mjs
+          yarn workspace @happier-dev/cli typecheck
+          yarn workspace @happier-dev/cli build
+          yarn workspace @happier-dev/server typecheck:runtime
+          yarn workspace @happier-dev/server build:runtime
+          yarn workspace @happier-dev/cli vitest run src/mcp/bridges/remoteMcpStdioBridge.integration.test.ts --config vitest.integration.config.ts --maxWorkers=1
+          yarn workspace @happier-dev/protocol test src/mcpServers --maxWorkers=2
+          yarn workspace @happier-dev/cli vitest run src/mcp/oauth src/api/machine/rpcHandlers.mcpOAuth.test.ts src/mcp/servers/materializeMcpServerConfigRecord.test.ts --maxWorkers=2
+          yarn workspace @happier-dev/server test:integration sources/app/api/routes/connect/mcpOAuthRoutes.integration.spec.ts --maxWorkers=1
       - name: Check session notifications and provider completion
         run: |
           yarn workspace @happier-dev/cli typecheck

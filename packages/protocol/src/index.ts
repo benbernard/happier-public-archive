@@ -3693,5 +3693,8 @@ export {
 
 export { assertAccountKeyProvisioningAllowed, AccountKeyProvisioningUnavailableError, verifyAccountContentPublicKeyBinding, createAccountContentPublicKeyBindingMessage } from './auth/accountKeyProvisioning.js';
 
+export { DaemonMcpOAuthRequestSchema, DaemonMcpOAuthResponseSchema,
+  type DaemonMcpOAuthRequest, type DaemonMcpOAuthResponse } from './mcpServers/daemonRpcV1.js';
+
 export { resolveSessionNotificationIdentifier } from './push/sessionNotificationIdentifier.js';
 export { isDirectSessionTurnCompletion } from './directSessions/directSessionTurnCompletion.js';

@@ -1,4 +1,10 @@
 const mcpServersUxTranslationExtension = {
+  mcpOAuthClientId: 'Client ID (optional)',
+  mcpOAuthSignIn: 'Sign in with browser',
+  mcpOAuthWaiting: 'Finish signing in, then return to Happier',
+  mcpOAuthConnected: 'Connected on this machine',
+  mcpOAuthDisconnect: 'Disconnect OAuth',
+
   mcpServersConfiguredEmptySubtitle: 'Create a server, import host JSON, or install a recommended preset.',
   mcpServersHeroSubtitle: ({ configuredCount }: { configuredCount: number }) => `${configuredCount} configured in Happier`,
   mcpServersHeroSubtitleEmpty: 'Create servers once, preview where they apply, and import what other tools already use.',

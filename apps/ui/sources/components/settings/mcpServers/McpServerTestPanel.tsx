@@ -1,9 +1,10 @@
+import { McpServerOAuthActions } from './McpServerOAuthActions';
 import * as React from 'react';
 import { View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
 import type { McpServerBindingV1, McpServerCatalogEntryV1 } from '@happier-dev/protocol';
-import { McpServerBindingV1Schema, McpServerCatalogEntryV1Schema } from '@happier-dev/protocol';
+import { resolveEffectiveServersV1, McpServerBindingV1Schema, McpServerCatalogEntryV1Schema } from '@happier-dev/protocol';
 
 import type { Machine } from '@/sync/domains/state/storageTypes';
 import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/forms/dropdown/DropdownMenu';
@@ -123,6 +124,13 @@ export const McpServerTestPanel = React.memo(function McpServerTestPanel(props: 
         return McpServerBindingV1Schema.safeParse(selectedBinding).success;
     }, [selectedBinding]);
 
+    const oauthServer = React.useMemo(() => {
+        if (!selectedBinding || !machineId) return props.server;
+        const resolved = resolveEffectiveServersV1({ v: 1, strictMode: true, servers: [props.server], bindings: [selectedBinding] },
+            { machineId, directory: directory.trim() || '/' }).serversByName[props.server.name];
+        return resolved?.enabled ? resolved.config : null;
+    }, [props.server, selectedBinding, machineId, directory]);
+
     const [isTesting, runTest] = useHappyAction(async () => {
         if (!machineId) {
             Modal.alert(t('common.error'), t('settings.mcpServersNoMachineSelected'));
@@ -227,6 +235,7 @@ export const McpServerTestPanel = React.memo(function McpServerTestPanel(props: 
                 )}
             />
 
+            {oauthServer?.remote?.oauth ? <McpServerOAuthActions server={oauthServer} machineId={machineId} serverId={selectedMachineServerId} /> : null}
             <Item
                 testID="mcp.server.test.run"
                 title={t('settings.mcpServersTestRunTitle')}

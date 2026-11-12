@@ -1,6 +1,6 @@
 import type { McpServerCatalogEntryV1, McpValueRefV1 } from './settingsV1.js';
 
-export type McpServerAuthModeV1 = 'none' | 'savedSecret' | 'machineEnv' | 'plainText';
+export type McpServerAuthModeV1 = 'oauth' | 'none' | 'savedSecret' | 'machineEnv' | 'plainText';
 
 function valueRefsFromServer(server: Pick<McpServerCatalogEntryV1, 'env' | 'remote'>): McpValueRefV1[] {
   const refs = Object.values(server.env ?? {});
@@ -13,6 +13,7 @@ function isEnvironmentTemplateLiteral(value: string): boolean {
 }
 
 export function inferMcpServerAuthModeV1(server: Pick<McpServerCatalogEntryV1, 'env' | 'remote'>): McpServerAuthModeV1 {
+  if (server.remote?.oauth) return 'oauth';
   const refs = valueRefsFromServer(server);
   if (refs.length === 0) return 'none';
 

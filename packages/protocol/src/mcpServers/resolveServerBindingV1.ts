@@ -143,7 +143,7 @@ function applyBindingOverrides(
       ? applyRecordPatch(server.remote.headers, overrides.remote.headersPatch)
       : server.remote.headers;
     if (nextUrl !== server.remote.url || nextHeaders !== server.remote.headers) {
-      out = { ...out, remote: { url: nextUrl, headers: nextHeaders } };
+      out = { ...out, remote: { ...out.remote, url: nextUrl, headers: nextHeaders } };
     }
   }
 

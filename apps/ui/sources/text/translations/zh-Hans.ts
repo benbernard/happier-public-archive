@@ -8,6 +8,12 @@
 import type { TranslationStructure } from "../_types";
 
 const mcpServersUxTranslationExtension = {
+  mcpOAuthClientId: "客户端 ID（可选）",
+  mcpOAuthSignIn: "在浏览器中登录",
+  mcpOAuthWaiting: "完成登录后返回 Happier",
+  mcpOAuthConnected: "已在此计算机上连接",
+  mcpOAuthDisconnect: "断开 OAuth 连接",
+
   mcpServersConfiguredEmptySubtitle: '创建一个服务器、导入主机 JSON，或安装推荐预设。',
   mcpServersHeroSubtitle: ({ configuredCount }: { configuredCount: number }) => `在 Happier 中已配置 ${configuredCount} 个`,
   mcpServersHeroSubtitleEmpty: '只需创建一次服务器，预览它们适用的位置，并导入其他工具已经在使用的配置。',

@@ -9,6 +9,12 @@ import type { TranslationStructure } from '../_types';
 import { zhHans } from './zh-Hans';
 
 const mcpServersUxTranslationExtension = {
+  mcpOAuthClientId: "用戶端 ID（選填）",
+  mcpOAuthSignIn: "在瀏覽器中登入",
+  mcpOAuthWaiting: "完成登入後返回 Happier",
+  mcpOAuthConnected: "已在此電腦上連線",
+  mcpOAuthDisconnect: "中斷 OAuth 連線",
+
   mcpServersConfiguredEmptySubtitle: '建立一個伺服器、匯入主機 JSON，或安裝推薦預設。',
   mcpServersHeroSubtitle: ({ configuredCount }: { configuredCount: number }) => `Happier 中已設定 ${configuredCount} 個`,
   mcpServersHeroSubtitleEmpty: '伺服器只需建立一次，就能預覽其適用位置，並匯入其他工具已在使用的設定。',

@@ -1,3 +1,4 @@
+import { DaemonMcpOAuthRequestSchema, DaemonMcpOAuthResponseSchema, type DaemonMcpOAuthRequest, type DaemonMcpOAuthResponse } from '@happier-dev/protocol';
 import {
     DaemonMcpServersDetectRequestSchema,
     DaemonMcpServersDetectResponseSchema,
@@ -95,4 +96,12 @@ export async function machineMcpServersPreview(
         throwUnsupportedResponse(RPC_METHODS.DAEMON_MCP_SERVERS_PREVIEW);
     }
     return parsed.data;
+}
+
+export async function machineMcpOAuth(machineId: string, input: DaemonMcpOAuthRequest, opts?: MachineMcpServersOpts): Promise<DaemonMcpOAuthResponse> {
+    const response = await machineRpcWithServerScope<unknown, DaemonMcpOAuthRequest>({
+        machineId, serverId: opts?.serverId, timeoutMs: opts?.timeoutMs ?? 60_000,
+        method: RPC_METHODS.DAEMON_MCP_OAUTH, payload: DaemonMcpOAuthRequestSchema.parse(input),
+    });
+    return DaemonMcpOAuthResponseSchema.parse(response);
 }

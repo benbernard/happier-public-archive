@@ -1,3 +1,4 @@
+import { mcpOAuthRoutes } from './mcpOAuthRoutes';
 import { type Fastify } from "../../types";
 
 import { connectAuthExternalRoutes } from "./connectRoutes.authExternal";
@@ -11,6 +12,7 @@ import { createServerFeatureGatedRouteApp } from "@/app/features/catalog/serverF
 import { registerOAuthCallbackRoute } from "./oauthExternal/registerOAuthCallbackRoute";
 
 export function connectRoutes(app: Fastify) {
+    mcpOAuthRoutes(app);
     connectAuthExternalRoutes(app);
 
     const connectedServicesApp = createServerFeatureGatedRouteApp(app, "connectedServices", process.env);

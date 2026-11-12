@@ -23,7 +23,7 @@ test('the Android-only guard exits non-zero with a clear message', () => {
   });
   assert.equal(result.status, 1);
   assert.match(result.stderr, /docs-build/);
-  assert.match(result.stderr, /only Android phone builds/i);
+  assert.match(result.stderr, /only Android phone and supporting backend builds/i);
 });
 
 test('iOS and desktop app scripts remain defined but disabled', () => {
@@ -40,10 +40,11 @@ test('iOS and desktop app scripts remain defined but disabled', () => {
   assert.equal(stack['mobile:prebuild'].includes('--platform=android'), true);
 });
 
-test('CLI, server, and docs builds remain defined but disabled', () => {
-  assertDisabled(readScripts('apps/cli/package.json'), 'build');
-  assertDisabled(readScripts('apps/server/package.json'), 'build');
-  assertDisabled(readScripts('apps/server/package.json'), 'build:runtime');
+test('supporting CLI and server builds are enabled while docs stay disabled', () => {
+  for (const target of ['cli-build', 'server-build', 'server-build-runtime']) {
+    const result = spawnSync(process.execPath, [join(repoRoot, 'scripts', 'android-only-build-guard.mjs'), target]);
+    assert.equal(result.status, 0, `${target} supports the Android OAuth flow`);
+  }
   assertDisabled(readScripts('apps/docs/package.json'), 'build');
 });
 

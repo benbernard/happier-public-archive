@@ -1,3 +1,4 @@
+import { registerMachineMcpOAuthRpcHandlers } from './rpcHandlers.mcpOAuth';
 import { randomUUID } from 'node:crypto';
 
 import { RPC_METHODS } from '@happier-dev/protocol/rpc';
@@ -141,6 +142,7 @@ export function registerMachineMcpServersRpcHandlers(params: Readonly<{
   }>;
 }>): void {
   const { rpcHandlerManager } = params;
+  registerMachineMcpOAuthRpcHandlers(rpcHandlerManager);
   const depsEnv = params.deps?.env ?? process.env;
   const readCredentialsImpl = params.deps?.readCredentials ?? readCredentials;
   const bootstrapAccountSettingsContextImpl = params.deps?.bootstrapAccountSettingsContext ?? bootstrapAccountSettingsContext;

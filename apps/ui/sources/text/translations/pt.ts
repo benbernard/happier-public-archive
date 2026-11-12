@@ -1,6 +1,12 @@
 import type { TranslationStructure } from "../_types";
 
 const mcpServersUxTranslationExtension = {
+  mcpOAuthClientId: "ID do cliente (opcional)",
+  mcpOAuthSignIn: "Entrar pelo navegador",
+  mcpOAuthWaiting: "Conclua o login e volte ao Happier",
+  mcpOAuthConnected: "Conectado neste computador",
+  mcpOAuthDisconnect: "Desconectar OAuth",
+
   mcpServersConfiguredEmptySubtitle:
     "Crie um servidor, importe JSON do host ou instale uma predefinição recomendada.",
   mcpServersHeroSubtitle: ({

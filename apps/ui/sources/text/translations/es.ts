@@ -1,6 +1,12 @@
 import type { TranslationStructure } from "../_types";
 
 const mcpServersUxTranslationExtension = {
+  mcpOAuthClientId: "ID de cliente (opcional)",
+  mcpOAuthSignIn: "Iniciar sesión en el navegador",
+  mcpOAuthWaiting: "Termina de iniciar sesión y vuelve a Happier",
+  mcpOAuthConnected: "Conectado en este equipo",
+  mcpOAuthDisconnect: "Desconectar OAuth",
+
   mcpServersConfiguredEmptySubtitle: 'Crea un servidor, importa JSON del host o instala un preajuste recomendado.',
   mcpServersHeroSubtitle: ({ configuredCount }: { configuredCount: number }) => `${configuredCount} configurados en Happier`,
   mcpServersHeroSubtitleEmpty: 'Crea servidores una vez, previsualiza dónde se aplican e importa lo que ya usan otras herramientas.',
