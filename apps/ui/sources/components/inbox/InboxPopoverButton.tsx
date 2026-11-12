@@ -45,6 +45,7 @@ export const InboxPopoverButton = React.memo(function InboxPopoverButton(props: 
     buttonSize: number;
     iconSize: number;
     testID?: string;
+    showLabel?: boolean;
 }>) {
     const { theme } = useUnistyles();
     const anchorRef = React.useRef<View>(null);
@@ -77,7 +78,7 @@ export const InboxPopoverButton = React.memo(function InboxPopoverButton(props: 
                 }}
                 style={({ pressed }) => [
                     styles.button,
-                    {
+                    props.showLabel ? styles.labelledButton : {
                         width: props.buttonSize,
                         height: props.buttonSize,
                         borderRadius: props.buttonSize / 2,
@@ -93,6 +94,7 @@ export const InboxPopoverButton = React.memo(function InboxPopoverButton(props: 
                     />
                     {props.summary.hasContent ? <View testID="sidebar-inbox-attention-dot" style={styles.attentionDot} /> : null}
                 </View>
+                {props.showLabel ? <Text style={styles.buttonLabel}>{t('tabs.inbox')}</Text> : null}
             </Pressable>
 
             {open ? (
@@ -141,6 +143,18 @@ const styles = StyleSheet.create((theme) => ({
     buttonPressed: {
         opacity: 0.68,
         transform: [{ scale: 0.96 }],
+    },
+    labelledButton: {
+        minHeight: 48,
+        minWidth: 48,
+        paddingHorizontal: 8,
+        flexDirection: 'row',
+        gap: 8,
+    },
+    buttonLabel: {
+        color: theme.colors.chrome.header.foreground,
+        fontSize: 14,
+        ...Typography.default(),
     },
     glyph: {
         position: 'relative',

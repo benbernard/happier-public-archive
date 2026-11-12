@@ -42,6 +42,10 @@ jobs:
           yarn workspace @happier-dev/app typecheck
           yarn workspace @happier-dev/app vitest run \
             sources/components/sessions/agentInput \
+            sources/components/navigation/shell/desktopChrome/DesktopSidebarChrome.test.tsx \
+            sources/components/inbox/InboxPopoverButton.test.tsx \
+            sources/components/inbox/actionOperations/ActionOperationActivityButton.test.tsx \
+            sources/components/ui/lists/ItemRowActions.test.ts \
             sources/components/sessions/transcript/MessageView.timestamps.test.tsx \
             sources/components/sessions/transcript/messageActions/MessageActionRow.test.tsx \
             sources/sync/domains/settings/settings.spec.ts \

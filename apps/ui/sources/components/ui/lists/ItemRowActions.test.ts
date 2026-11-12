@@ -112,6 +112,8 @@ describe('ItemRowActions', () => {
 
         const screen = await renderScreen(React.createElement(ItemRowActions, {
             title: 'Profile',
+            layoutWidthPx: 1000,
+            forceCompact: true,
             overflowTriggerTestID: 'row-actions-trigger',
             actions: [
                 { id: 'edit', title: 'Edit profile', icon: 'pencil-simple', onPress: onEdit },

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import { useUnistyles } from 'react-native-unistyles';
 import { ConnectionStatusControl } from '@/components/navigation/ConnectionStatusControl';
 import { useDesktopWindowDragMouseProps } from '@/components/navigation/desktopWindowChrome/DesktopWindowDragRegion';
@@ -45,6 +45,7 @@ export const DesktopSidebarChrome = React.memo((props: DesktopSidebarChromeProps
     const styles = desktopSidebarChromeStyles;
     const { theme } = useUnistyles();
     const hasDesktopWindowControls = props.desktopWindowControls != null;
+    const isNative = Platform.OS !== 'web';
     const topStripDragProps = useDesktopWindowDragMouseProps();
     const canNavigateBack = props.canNavigateBack ?? true;
     const canNavigateForward = props.canNavigateForward ?? true;
@@ -61,10 +62,11 @@ export const DesktopSidebarChrome = React.memo((props: DesktopSidebarChromeProps
         return props.headerActions;
     }, [hasDesktopWindowControls, props.headerActions, topUtilityActionIds]);
     const compactContentActionIds = React.useMemo(() => {
+        if (isNative) return ['newSession'];
         return hasDesktopWindowControls
             ? ['projects', 'newSession']
             : ['projects', 'settings', 'newSession'];
-    }, [hasDesktopWindowControls]);
+    }, [hasDesktopWindowControls, isNative]);
 
     const renderTopUtilityAction = React.useCallback((action: ItemAction) => {
         const color = action.color ?? theme.colors.chrome.header.foreground;
@@ -88,6 +90,35 @@ export const DesktopSidebarChrome = React.memo((props: DesktopSidebarChromeProps
         );
     }, [styles.topIconButton, styles.topSettingsIconButton, theme.colors.chrome.header.foreground]);
 
+    const utilityControls = (
+        <View testID={isNative ? "sidebar-native-utilities" : undefined} style={isNative ? styles.nativeUtilityRow : styles.inlineUtilityRow}>
+            {/* Desktop uses compact icons; native utilities have their own labelled row. */}
+            {hasDesktopWindowControls ? null : (
+                <UpdatesEntry
+                    variant={isNative ? "header" : "icon"}
+                    buttonSize={32}
+                    iconSize={DESKTOP_SIDEBAR_CHROME_ICON_GLYPH_SIZE_PX}
+                    testID="desktop-sidebar-updates-button"
+                />
+            )}
+            {props.inboxEnabled && props.inboxSummary ? (
+                <InboxPopoverButton
+                    showLabel={isNative}
+                    summary={props.inboxSummary}
+                    testID="sidebar-inbox-button"
+                    buttonSize={32}
+                    iconSize={DESKTOP_SIDEBAR_CHROME_ICON_GLYPH_SIZE_PX}
+                />
+            ) : null}
+            <ActionOperationActivityButton
+                showLabel={isNative}
+                testID="desktop-sidebar-action-operations"
+                buttonSize={32}
+                iconSize={DESKTOP_SIDEBAR_CHROME_ICON_GLYPH_SIZE_PX}
+            />
+        </View>
+    );
+
     const actionsRow = (
         <View testID="desktop-sidebar-chrome-actions-row" style={styles.rightContainer}>
             <ItemRowActions
@@ -95,35 +126,10 @@ export const DesktopSidebarChrome = React.memo((props: DesktopSidebarChromeProps
                 actions={contentHeaderActions}
                 layoutWidthPx={props.sidebarWidthPx ?? null}
                 compactThreshold={DESKTOP_SIDEBAR_CHROME_ACTIONS_COMPACT_THRESHOLD_PX}
+                forceCompact={isNative}
                 compactActionIds={compactContentActionIds}
                 pinnedActionIds={compactContentActionIds}
-                leadingPinnedContent={(
-                    <View style={styles.inlineUtilityRow}>
-                        {/* Without a desktop top rail, Updates joins this icon row; it leads so the
-                            icons after it stay put when it appears. */}
-                        {hasDesktopWindowControls ? null : (
-                            <UpdatesEntry
-                                variant="icon"
-                                buttonSize={32}
-                                iconSize={DESKTOP_SIDEBAR_CHROME_ICON_GLYPH_SIZE_PX}
-                                testID="desktop-sidebar-updates-button"
-                            />
-                        )}
-                        {props.inboxEnabled && props.inboxSummary ? (
-                            <InboxPopoverButton
-                                summary={props.inboxSummary}
-                                testID="sidebar-inbox-button"
-                                buttonSize={32}
-                                iconSize={DESKTOP_SIDEBAR_CHROME_ICON_GLYPH_SIZE_PX}
-                            />
-                        ) : null}
-                        <ActionOperationActivityButton
-                            testID="desktop-sidebar-action-operations"
-                            buttonSize={32}
-                            iconSize={DESKTOP_SIDEBAR_CHROME_ICON_GLYPH_SIZE_PX}
-                        />
-                    </View>
-                )}
+                leadingPinnedContent={isNative ? null : utilityControls}
                 overflowPosition="beforePinned"
                 overflowTriggerTestID="sidebar-header-actions-overflow"
                 popoverBoundaryRef={props.popoverBoundaryRef}
@@ -261,6 +267,7 @@ export const DesktopSidebarChrome = React.memo((props: DesktopSidebarChromeProps
 
                 {actionsRow}
             </View>
+            {isNative ? utilityControls : null}
         </View>
     );
 });
