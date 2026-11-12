@@ -3,7 +3,7 @@ import type {
   DirectTranscriptRawMessageV1,
   DirectTranscriptTruncationReason,
 } from '@happier-dev/protocol';
-import { resolveDirectTranscriptContinuation } from '@happier-dev/protocol';
+import { isDirectSessionTurnCompletion, resolveDirectTranscriptContinuation } from '@happier-dev/protocol';
 
 import { dispatchActivityNotificationAsync } from '@/activity/notifications/dispatchActivityNotification';
 import { readCredentials, type Credentials } from '@/persistence';
@@ -92,6 +92,8 @@ export async function createManagedDirectSessionFollowLease(params: Readonly<{
   }
 
   let released = false;
+  let latestAssistantPreview: string | null = null;
+  let lastNotifiedCompletionId: string | null = null;
   let metadataWriteContextPromise: Promise<MetadataWriteContext | null> | null = null;
 
   const resolveCachedMetadataWriteContext = async (): Promise<MetadataWriteContext | null> => {
@@ -151,8 +153,9 @@ export async function createManagedDirectSessionFollowLease(params: Readonly<{
       }).catch(() => undefined);
     }
 
-    const previewText = buildDirectSessionReadyNotificationPreview(items);
-    if (!previewText) {
+    latestAssistantPreview = buildDirectSessionReadyNotificationPreview(items) ?? latestAssistantPreview;
+    const completion = [...items].reverse().find(isDirectSessionTurnCompletion);
+    if (!completion || completion.id === lastNotifiedCompletionId) {
       return;
     }
 
@@ -161,6 +164,7 @@ export async function createManagedDirectSessionFollowLease(params: Readonly<{
       return;
     }
 
+    lastNotifiedCompletionId = completion.id;
     await dispatchActivityNotificationAsync({
       settings: snapshot.settings,
       settingsSecretsReadKeys: snapshot.settingsSecretsReadKeys,
@@ -169,7 +173,7 @@ export async function createManagedDirectSessionFollowLease(params: Readonly<{
         sessionId: params.sessionId,
         sessionTitle: metadataContext?.sessionTitle ?? null,
         waitingForCommandLabel: metadataContext?.sessionTitle ?? params.sessionId,
-        assistantPreviewText: previewText,
+        assistantPreviewText: latestAssistantPreview,
       },
     }).catch(() => undefined);
   });

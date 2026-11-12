@@ -6204,16 +6204,7 @@ class Sync {
 
           const normalizedMessages = normalizeDirectTranscriptMessages(items);
           if (normalizedMessages.length > 0) {
-              const applied = this.applyMessages(sessionId, normalizedMessages, { notifyVoice: false, notifyActivity: true });
-              if (!applied.hasReadyEvent) {
-                  const sessionMessages = storage.getState().sessionMessages[sessionId];
-                  const changedMessages = applied.changed
-                      .map((messageId) => sessionMessages?.messagesMap[messageId] ?? null)
-                      .filter((message): message is Message => Boolean(message) && message.kind === 'agent-text');
-                  if (changedMessages.length > 0) {
-                      notifyActivityReady(sessionId, changedMessages);
-                  }
-              }
+              this.applyMessages(sessionId, normalizedMessages, { notifyVoice: false, notifyActivity: true });
           }
 
           if (Object.prototype.hasOwnProperty.call(options ?? {}, 'nextCursor')) {
@@ -8130,7 +8121,13 @@ class Sync {
                     voiceHooks.onReady(sessionId, liveEffectMessages);
                 }
                 if (notifyActivity) {
-                    notifyActivityReady(sessionId, liveEffectMessages);
+                    const notificationMessages = liveEffectMessages.some((message) => message.kind === 'agent-text')
+                        ? liveEffectMessages
+                        : Object.values(storage.getState().sessionMessages[sessionId]?.messagesMap ?? {})
+                            .filter((message) => message.kind === 'agent-text')
+                            .sort((left, right) => left.createdAt - right.createdAt)
+                            .slice(-1);
+                    notifyActivityReady(sessionId, notificationMessages);
                 }
             }
         }

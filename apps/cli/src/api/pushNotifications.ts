@@ -1,3 +1,4 @@
+import { resolveSessionNotificationIdentifier } from '@happier-dev/protocol';
 import axios from 'axios'
 import { boundExpoPushMessage } from './boundExpoPushMessage'
 import { logger } from '@/ui/logger'
@@ -401,6 +402,8 @@ export class PushNotificationClient {
             const messages: ExpoPushMessage[] = tokens.map((token, index) => {
                 if (debugPush) logger.debug(`[PUSH] Creating message ${index + 1} for token`)
                 const baseUrl = normalizeClientServerUrl(token.clientServerUrl) ?? this.baseUrl
+                const notificationData = withServerUrlInPushData({ baseUrl, data });
+                const identifier = resolveSessionNotificationIdentifier(notificationData);
                 const categoryId = resolveCategoryIdFromPushData(data);
                 const channelId = resolveAndroidChannelIdFromPushData(data);
                 const subtitle = resolveIosSubtitleFromPushData(data);
@@ -408,7 +411,8 @@ export class PushNotificationClient {
                     to: token.token,
                     title,
                     body,
-                    data: withServerUrlInPushData({ baseUrl, data }),
+                    data: notificationData,
+                    ...(identifier ? { tag: identifier, collapseId: identifier } : {}),
                     sound: 'default',
                     priority: 'high',
                     categoryId,

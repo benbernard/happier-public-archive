@@ -113,6 +113,7 @@ function projectPiMessageRows(message: Record<string, unknown>, baseId: string):
             type: 'assistant',
             message: {
               role: 'assistant',
+              ...(message.stopReason === 'stop' ? { stop_reason: 'end_turn' } : {}),
               ...(typeof message.model === 'string' ? { model: message.model } : {}),
               ...(isRecord(message.usage) ? { usage: message.usage } : {}),
               content: normalized,

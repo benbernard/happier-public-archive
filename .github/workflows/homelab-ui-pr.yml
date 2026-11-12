@@ -48,6 +48,10 @@ jobs:
             sources/components/settings/mcpServers/McpServerOAuthActions.test.tsx \
             sources/components/settings/mcpServers/McpServerEditorScreen.test.tsx \
             sources/components/settings/mcpServers/McpServerTestPanel.test.tsx \
+            sources/activity/notifications/channels/sendExpoLocalNotification.test.ts \
+            sources/sync/sync.sessionMissingServerScope.test.ts \
+            sources/sync/sync.readyNotificationDedupe.test.ts \
+            sources/sync/typesRaw/normalize.messageRole.test.ts \
             sources/components/ui/forms/MultiTextInput.test.tsx \
             sources/components/sessions/new/components/NewSessionSimplePanel.keyboardScaffold.test.tsx \
             sources/components/sessions/actions/SessionHeaderActionMenu.sessionHandoff.test.tsx \
@@ -64,3 +68,14 @@ jobs:
           yarn workspace @happier-dev/protocol test src/mcpServers --maxWorkers=2
           yarn workspace @happier-dev/cli vitest run src/mcp/oauth src/api/machine/rpcHandlers.mcpOAuth.test.ts src/mcp/servers/materializeMcpServerConfigRecord.test.ts --maxWorkers=2
           yarn workspace @happier-dev/server test:integration sources/app/api/routes/connect/mcpOAuthRoutes.integration.spec.ts --maxWorkers=1
+      - name: Check session notifications and provider completion
+        run: |
+          yarn workspace @happier-dev/cli typecheck
+          yarn workspace @happier-dev/protocol test src/push/sessionNotificationIdentifier.test.ts src/directSessions/directSessionTurnCompletion.test.ts --maxWorkers=2
+          yarn workspace @happier-dev/cli vitest run \
+            src/api/pushNotifications.sendToAllDevices.test.ts \
+            src/api/directSessions/backgroundFollow \
+            src/backends/codex/directSessions \
+            src/backends/claude/directSessions/mapClaudeJsonlLineToDirectMessages.test.ts \
+            src/backends/pi/directSessions/mapPiSessionToDirectMessages.test.ts \
+            src/backends/opencode/directSessions --maxWorkers=2
