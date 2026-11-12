@@ -50,6 +50,12 @@ export const desktopSidebarChromeStyles = StyleSheet.create((theme) => ({
         position: 'relative',
         zIndex: 1,
     },
+    nativeUtilityRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: 8,
+    },
     inlineUtilityRow: {
         flexDirection: 'row',
         alignItems: 'center',

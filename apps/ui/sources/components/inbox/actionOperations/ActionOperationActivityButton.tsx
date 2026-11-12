@@ -4,6 +4,8 @@ import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import type { ActionOperationSnapshotV1 } from '@happier-dev/protocol';
 
 import { Icon, ICON_SIZE } from '@/components/ui/icons/Icon';
+import { Text } from '@/components/ui/text/Text';
+import { Typography } from '@/constants/Typography';
 import { TabBadge } from '@/components/ui/navigation/tabBadge/TabBadge';
 import { FloatingOverlay } from '@/components/ui/overlays/FloatingOverlay';
 import { Popover } from '@/components/ui/popover';
@@ -33,6 +35,7 @@ export type ActionOperationActivityButtonViewProps = Readonly<{
     buttonSize?: number;
     iconSize?: number;
     testID?: string;
+    showLabel?: boolean;
 }>;
 
 type ActionOperationActivityPopoverPlacement = Readonly<{
@@ -53,6 +56,7 @@ type ActionOperationActivityButtonChromeProps = Readonly<{
     buttonSize?: number;
     iconSize?: number;
     testID?: string;
+    showLabel?: boolean;
 }>;
 
 const ActionOperationActivityButtonChrome = React.memo(function ActionOperationActivityButtonChrome(
@@ -73,6 +77,12 @@ const ActionOperationActivityButtonChrome = React.memo(function ActionOperationA
     if (!visible) return null;
 
     const tintColor = props.tintColor ?? theme.colors.chrome.header.foreground;
+    const badgeStyle = props.showLabel ? styles.inlineBadge : undefined;
+    const badge = props.activeCount > 0 ? (
+        <TabBadge testID="action-operation-activity-count" variant="count" value={props.activeCount} tone="neutral" style={badgeStyle} />
+    ) : (
+        <TabBadge testID="action-operation-activity-attention-dot" variant="dot" style={badgeStyle} />
+    );
     return (
         <View ref={anchorRef} collapsable={false} style={styles.anchor}>
             <Pressable
@@ -104,7 +114,7 @@ const ActionOperationActivityButtonChrome = React.memo(function ActionOperationA
                 }}
                 style={({ pressed }) => [
                     styles.button,
-                    props.buttonSize != null ? {
+                    props.showLabel ? styles.labelledButton : props.buttonSize != null ? {
                         width: props.buttonSize,
                         height: props.buttonSize,
                         borderRadius: props.buttonSize / 2,
@@ -114,12 +124,10 @@ const ActionOperationActivityButtonChrome = React.memo(function ActionOperationA
             >
                 <View style={styles.glyph}>
                     <Icon name="pulse" size={props.iconSize ?? ICON_SIZE.md} color={tintColor} />
-                    {props.activeCount > 0 ? (
-                        <TabBadge testID="action-operation-activity-count" variant="count" value={props.activeCount} tone="neutral" />
-                    ) : (
-                        <TabBadge testID="action-operation-activity-attention-dot" variant="dot" />
-                    )}
+                    {props.showLabel ? null : badge}
                 </View>
+                {props.showLabel ? <Text style={[styles.buttonLabel, { color: tintColor }]}>{t('inbox.updates')}</Text> : null}
+                {props.showLabel ? badge : null}
             </Pressable>
             {open ? props.renderDetails({
                 anchorRef,
@@ -253,6 +261,7 @@ export const ActionOperationActivityButtonView = React.memo(function ActionOpera
             buttonSize={props.buttonSize}
             iconSize={props.iconSize}
             testID={props.testID}
+            showLabel={props.showLabel}
         />
     );
 });
@@ -283,6 +292,7 @@ export const ActionOperationActivityButton = React.memo(function ActionOperation
     buttonSize?: number;
     iconSize?: number;
     testID?: string;
+    showLabel?: boolean;
 }>) {
     const accountId = useActiveServerAccountScope()?.accountId ?? '';
     const summary = useActionOperationActivitySummary(accountId);
@@ -297,6 +307,7 @@ export const ActionOperationActivityButton = React.memo(function ActionOperation
             buttonSize={props.buttonSize}
             iconSize={props.iconSize}
             testID={props.testID}
+            showLabel={props.showLabel}
         />
     );
 });
@@ -316,6 +327,24 @@ const styles = StyleSheet.create((theme) => ({
     buttonPressed: {
         opacity: 0.68,
         transform: [{ scale: 0.96 }],
+    },
+    labelledButton: {
+        width: 'auto',
+        height: 'auto',
+        minHeight: 48,
+        minWidth: 48,
+        paddingHorizontal: 8,
+        flexDirection: 'row',
+        gap: 8,
+    },
+    buttonLabel: {
+        fontSize: 14,
+        ...Typography.default(),
+    },
+    inlineBadge: {
+        position: 'relative',
+        top: 0,
+        right: 0,
     },
     glyph: {
         position: 'relative',

@@ -96,6 +96,7 @@ describe('ActionOperationActivityButtonView', () => {
                 operations={[operation()]}
                 hasAttention={true}
                 preferredSessionId="session-1"
+                showLabel
                 observationForOperation={() => 'available'}
                 contextForOperation={() => 'Current session'}
                 onOpenOperation={onOpenOperation}
@@ -103,6 +104,7 @@ describe('ActionOperationActivityButtonView', () => {
             />,
         );
 
+        expect(screen.getTextContent()).toContain('Activity');
         await act(async () => {
             await screen.findByTestId('action-operation-activity-button')?.props.onPress({
                 currentTarget: {

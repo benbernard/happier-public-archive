@@ -30,6 +30,8 @@ export interface ItemRowActionsProps {
         accessibilityHint: string;
     }>) => React.ReactNode;
     compactThreshold?: number;
+    /** Keep secondary actions in the labelled menu regardless of container width. */
+    forceCompact?: boolean;
     compactActionIds?: string[];
     /**
      * Action IDs that should remain visible on compact layouts and be rendered
@@ -66,7 +68,7 @@ export function ItemRowActions(props: ItemRowActionsProps) {
         && props.layoutWidthPx > 0
             ? props.layoutWidthPx
             : windowWidth;
-    const compact = widthForCompact < (props.compactThreshold ?? 450);
+    const compact = props.forceCompact === true || widthForCompact < (props.compactThreshold ?? 450);
     const [showOverflow, setShowOverflow] = React.useState(false);
     const overflowAnchorRef = React.useRef<View>(null);
 
