@@ -1,3 +1,4 @@
+import { resolveSessionNotificationIdentifier } from '@happier-dev/protocol';
 import { loadExpoNotifications } from '@/utils/platform/loadExpoNotifications';
 
 export async function sendExpoLocalNotification(params: Readonly<{
@@ -10,7 +11,9 @@ export async function sendExpoLocalNotification(params: Readonly<{
     const categoryIdentifier = typeof params.categoryIdentifier === 'string' && params.categoryIdentifier.trim().length > 0
         ? params.categoryIdentifier
         : undefined;
+    const identifier = resolveSessionNotificationIdentifier(params.data);
     return Notifications.scheduleNotificationAsync({
+        ...(identifier ? { identifier } : {}),
         content: {
             title: params.title,
             body: params.body,

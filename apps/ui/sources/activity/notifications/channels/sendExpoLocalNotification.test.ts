@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const scheduleNotificationAsync = vi.hoisted(() => vi.fn(async () => 'notif-1'));
+const scheduleNotificationAsync = vi.hoisted(() => vi.fn(async (_request: { identifier?: string; content: unknown; trigger: null }) => 'notif-1'));
 const notificationNativeState = vi.hoisted(() => ({ unavailable: false }));
 
 vi.mock('expo-notifications', () => {
@@ -36,6 +36,7 @@ describe('sendExpoLocalNotification', () => {
         });
 
         expect(scheduleNotificationAsync).toHaveBeenCalledWith({
+            identifier: expect.any(String),
             content: {
                 title: 'Session ready',
                 body: 'Codex finished the turn.',
@@ -45,6 +46,17 @@ describe('sendExpoLocalNotification', () => {
             },
             trigger: null,
         });
+    });
+
+    it('reuses the notification identifier for the latest alert in a session', async () => {
+        const { sendExpoLocalNotification } = await import('./sendExpoLocalNotification');
+        for (const sessionId of ['one', 'one', 'two']) {
+            await sendExpoLocalNotification({ title: 'Ready', body: 'Latest', data: { sessionId } });
+        }
+        const requests = scheduleNotificationAsync.mock.calls.map((call) => call[0]);
+        expect(requests[0].identifier).toEqual(expect.any(String));
+        expect(requests[1].identifier).toBe(requests[0].identifier);
+        expect(requests[2].identifier).not.toBe(requests[0].identifier);
     });
 
     it('omits the native category field when no category is provided', async () => {
@@ -58,6 +70,7 @@ describe('sendExpoLocalNotification', () => {
         });
 
         expect(scheduleNotificationAsync).toHaveBeenCalledWith({
+            identifier: expect.any(String),
             content: {
                 title: 'Session ready',
                 body: 'Codex finished the turn.',
